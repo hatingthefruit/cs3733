@@ -10,8 +10,8 @@ endTARGET = runall
 
 # Rule for building the executable
 all: ${objects}
-	gcc -g -o ${initTARGET} ${objects}
+	gcc -g -o bin/${initTARGET} ${objects}
 
 # Special rule to remove the .o files
 clean:
-	rm -f ${objects} ${initTARGET} ${endTARGET}
+	rm -f ${objects} bin/${initTARGET} bin/${endTARGET}
