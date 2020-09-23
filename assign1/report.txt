@@ -1,0 +1,27 @@
+a.) The program is complete and working.
+
+b.) The main body of the program loops through the argv array:
+        For each argument given, the fork() syscall is invoked. After invokation, if the current process is the child:
+            Call the countWords function with the current filename.
+            Print out an error message if the file cannot be opened; Print the word count otherwise
+            Exit the current process
+        If the current process is not the child (Therefore the parent):
+            Increment the count of child processes
+    Once all child processes have spawned, the main process then uses a loop to wait for each child process. In each iteration:
+        The wait() syscall is invoked with NULL as the argument
+        A counter is incremented after each wait() syscall is finished; the loop exits once every child has been waited on
+    The total number of files counted is then printed out
+
+    The countWords() function works as follows:
+        An attempt is made to open the file whose name is passed as an argument using fopen(). If it fails, return -1 and exit
+        A loop is executed until EOF is reached:
+            Read in up to the maximum number of characters possible for the input buffer
+            Loop through every character in the input buffer:
+                If the current character is not a space, check if the previous character is a space. If so, increment the counter
+                Set the previous character to the current character
+        Once the whole file has been read, the file is closed using fclose()
+        The value of the counter is returned
+
+c.) I did not receive help from a TA or classmate for this assignment; I did, however use online references/stackoverflow for help understanding how to use the syscalls.
+
+d.) This assignment is pretty straightforward, and the assignment description is detailed enough that it's not hard to get started. I can't really think of any suggestions for improvement.
