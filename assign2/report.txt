@@ -1,0 +1,185 @@
+a.) N/A
+b.) This program is complete and working. My initial test program works as expected, and I have checked the md5 checksum of the outputs from runall.c against the provided checks given on blackboard.
+c.)
+
+d.)
+
+3 8 7 3 6 3 2
+scheduler fcfs:
+RRRRRRRRwwwwwwwRRR
+rrrrrrrrRRRRRRwwwrRR
+0 9 4.5 0.95000
+scheduler sjf:
+rrrrrrRRRRRRRRwwwwwwwRRR
+RRRRRRwwwrrrrrRR
+6 5 5.5 0.79167
+scheduler psjf:
+rrrrrrRRRrrRRRRRwwwwwwwRRR
+RRRRRRwwwRR
+8 0 4.0 0.73077
+scheduler rr:
+RRRrrrRRRrrrRRwwwwwwwRRR
+rrrRRRrrrRRRwwwRR
+6 6 6.0 0.79167
+
+3 8 7 3 6 7 2
+scheduler fcfs:
+RRRRRRRRwwwwwwwRRR
+rrrrrrrrRRRRRRwwwwwwwRR
+0 8 4.0 0.82609
+scheduler sjf:
+rrrrrrRRRRRRRRwwwwwwwRRR
+RRRRRRwwwwwwwrRR
+6 1 3.5 0.79167
+scheduler psjf:
+rrrrrrRRRRRRRRwwwwwwwRRR
+RRRRRRwwwwwwwrRR
+6 1 3.5 0.79167
+scheduler rr:
+RRRrrrRRRrrrRRwwwwwwwRRR
+rrrRRRrrrRRRwwwwwwwRR
+6 6 6.0 0.79167
+
+4 8 7 3 6 1 2
+scheduler fcfs:
+RRRRRRRRwwwwwwwRRR
+rrrrrrrrRRRRRRwrrrRR
+0 11 5.5 0.95000
+scheduler sjf:
+rrrrrrRRRRRRRRwwwwwwwRRR
+RRRRRRwrrrrrrrRR
+6 7 6.5 0.79167
+scheduler psjf:
+rrrrrrRrrRRRRRRRwwwwwwwRRR
+RRRRRRwRR
+8 0 4.0 0.73077
+scheduler rr:
+RRRRrrrrRRRRwwwwwwwRRR
+rrrrRRRRrrrrRRwRR
+4 8 6.0 0.86364
+
+3 3 3 4 2 1 2
+scheduler fcfs:
+RRRwwwRRRR
+rrrRRwrrrrRR
+0 7 3.5 0.91667
+scheduler sjf:
+rrRRRwwwRRRR
+RRwrrRR
+2 2 2.0 0.91667
+scheduler psjf:
+rrRRRwwwRRRR
+RRwrrRR
+2 2 2.0 0.91667
+scheduler rr:
+RRRwwwRRRrrR
+rrrRRwrrrRR
+2 6 4.0 0.91667
+
+3 3 2 3 2 1 2
+scheduler fcfs:
+RRRwwRRR
+rrrRRwrrRR
+0 5 2.5 1.00000
+scheduler sjf:
+rrRRRwwRRR
+RRwrrRR
+2 2 2.0 1.00000
+scheduler psjf:
+rrRRRwwRRR
+RRwrrRR
+2 2 2.0 1.00000
+scheduler rr:
+RRRwwRRR
+rrrRRwrrRR
+0 5 2.5 1.00000
+
+3 5 2 5 4 1 1
+scheduler fcfs:
+RRRRRwwrrRRRRR
+rrrrrRRRRwrrrrR
+2 9 5.5 1.00000
+scheduler sjf:
+rrrrRRRRRwwRRRRR
+RRRRwrrrrR
+4 4 4.0 0.93750
+scheduler psjf:
+rrrrRrRRRRwwRRRRR
+RRRRwR
+5 0 2.5 0.88235
+scheduler rr:
+RRRrrrRRwwRRRrRR
+rrrRRRrrRwrrrR
+4 8 6.0 0.93750
+
+3 2 3 4 1 1 5
+scheduler fcfs:
+RRwwwrrrrRRRR
+rrRwRRRRR
+4 2 3.0 0.92308
+scheduler sjf:
+rRRwwwrrRRRR
+RwrRRRRR
+3 1 2.0 1.00000
+scheduler psjf:
+rRRwwwrrRRRR
+RwrRRRRR
+3 1 2.0 1.00000
+scheduler rr:
+RRwwwrrRRRrrR
+rrRwRRRrrrRR
+4 5 4.5 0.92308
+
+3 2 3 4 1 4 1
+scheduler fcfs:
+RRwwwRRRR
+rrRwwwwrrR
+0 4 2.0 0.80000
+scheduler sjf:
+rRRwwwRRRR
+RwwwwR
+1 0 0.5 0.80000
+scheduler psjf:
+rRRwwwRRRR
+RwwwwR
+1 0 0.5 0.80000
+scheduler rr:
+RRwwwRRRrR
+rrRwwwwrR
+1 3 2.0 0.80000
+
+3 2 3 4 5 6 2
+scheduler fcfs:
+RRwwwrrRRRR
+rrRRRRRwwwwwwRR
+2 2 2.0 0.86667
+scheduler sjf:
+RRwwwrrRRRR
+rrRRRRRwwwwwwRR
+2 2 2.0 0.86667
+scheduler psjf:
+RRwwwrrRRRR
+rrRRRRRwwwwwwRR
+2 2 2.0 0.86667
+scheduler rr:
+RRwwwRRRrrR
+rrRRRrrrRRwwwwwwRR
+2 5 3.5 0.72222
+
+
+ls -l *.all
+-rw-rw-r-- 1 ebq929 ebq929 44344515 Oct  9 12:25 fcfs.all
+-rw-rw-r-- 1 ebq929 ebq929 42267264 Oct  9 12:25 psjf.all
+-rw-rw-r-- 1 ebq929 ebq929 46409194 Oct  9 12:25 rr.all
+-rw-rw-r-- 1 ebq929 ebq929 43243799 Oct  9 12:25 sjf.all
+wc *.all
+  2000001   2000003  44344515 fcfs.all
+  2000001   2000003  42267264 psjf.all
+  2000001   2000003  46409194 rr.all
+  2000001   2000003  43243799 sjf.all
+  8000004   8000012 176264772 total
+md5sum *.all
+2be6461f5d8970238f6edc53bf9bcb5f  fcfs.all
+865938b5c84f1af6614fe5d7c816693e  psjf.all
+777319806052527c79ad86331a0f3437  rr.all
+e929ee37a27e89ddbc066574a09881cb  sjf.all
