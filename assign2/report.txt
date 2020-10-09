@@ -168,10 +168,10 @@ rrRRRrrrRRwwwwwwRR
 
 
 ls -l *.all
--rw-rw-r-- 1 ebq929 ebq929 44344515 Oct  9 12:25 fcfs.all
--rw-rw-r-- 1 ebq929 ebq929 42267264 Oct  9 12:25 psjf.all
--rw-rw-r-- 1 ebq929 ebq929 46409194 Oct  9 12:25 rr.all
--rw-rw-r-- 1 ebq929 ebq929 43243799 Oct  9 12:25 sjf.all
+-rw-r--r-- 1 ebq929 students 44344515 Oct  9 12:33 fcfs.all
+-rw-r--r-- 1 ebq929 students 42267264 Oct  9 12:33 psjf.all
+-rw-r--r-- 1 ebq929 students 46409194 Oct  9 12:33 rr.all
+-rw-r--r-- 1 ebq929 students 43243799 Oct  9 12:33 sjf.all
 wc *.all
   2000001   2000003  44344515 fcfs.all
   2000001   2000003  42267264 psjf.all
