@@ -5,6 +5,24 @@ File Name: assign2.c
 Course/Section: CS 3733 - 002
 Due Date: 11OCT2020
 Instructor: Dr. Silvestro
+
+Testing program to validate the scheduling algorithms. The program takes command line arguments of the form:
+    ./assign2 q x1 y1 z1 x2 y2 z2
+where:
+    q stands for the quantum value
+    (x1, y1, z1) correspond to a process with x1 units of CPU burst, y1 units of I/O burst, then z1 more units of CPU
+        burst
+    (x2, y2, z2) correspond to a process with x2 units of CPU burst, y2 units of I/O burst, then z2 more units of CPU
+        burst
+The arguments are checked for correctness, then passed to each cpu scheduler function in turn. After running each
+algorithm, the printSchedOutput function is called to calculate statistics and print out the formatted output from the
+scheduler, as well as the required statstics.
+
+This program can be compiled by running make command with the included makefile. Alternately, it can be compiled with
+the command:
+
+gcc -o assign2 assign2.c pslibrary.c
+
 */
 
 #include "pslibrary.h"
@@ -17,7 +35,9 @@ void printSchedOutput(char *s1, char *s2, char *alg);
 
 int main(int argc, char *argv[])
 {
+    // Declare variables
     int i, q, x1, x2, y1, y2, z1, z2;
+    // Store the addresses of the arguments to allow filling them in a loop later
     int *argAdds[] = {&q, &x1, &y1, &z1, &x2, &y2, &z2};
     // Print usage message if the number of arguments is incorrect
     if (argc != 8) {
@@ -39,11 +59,20 @@ int main(int argc, char *argv[])
             printf(" ");
         }
         printf("%s", argv[i]);
-        // convert current argument to pass to schedulers
-        // If atoi fails, it returns 0, which does not work for our purposes
-        *(argAdds[i - 1]) = atoi(argv[i]);
+
+        // Parse current argument to int to pass to schedulers
+        if (sscanf(argv[i], "%d", argAdds[i - 1]) == 1) {
+            // Continue if the argument can be converted into an int
+        }
+        else {
+            // Exit with an error message if the argument passed was not a valid integer
+            printf("Error parsing argument %s to number; exiting now\n", argv[i]);
+            exit(1);
+        }
     }
     printf("\n");
+    // Check that all the arguments are greater than 0; the library functions assume this to be true, so it is an error
+    // if any arguments are not greater than 0.
     for (i = 0; i < argc - 1; i++) {
         if (*(argAdds[i]) <= 0) {
             printf("Bad argument '%d': arguments must be greater than 0\n", *(argAdds[i]));
@@ -85,11 +114,17 @@ int main(int argc, char *argv[])
     rr(ps1, ps2, q, x1, y1, z1, x2, y2, z2);
     printSchedOutput(ps1, ps2, "rr");
 
+    // Make sure buffers are freed
     free(ps1);
     free(ps2);
 }
 
-// Process and print the output for the scheduler output passed to it
+// Process and print the output for the scheduler buffers passed to it. This includes the scheduler output, as well as
+// the name of the scheduler and the statistics for the current algorithm. Arguments:
+//      char *s1: A string containing the scheduler output for process 1
+//      char *s2: A string containing the scheduler output for process 2
+//      char *alg: A string containing the name of the scheduler that output the current strings; this allows us to
+//      embed it in the output
 void printSchedOutput(char *s1, char *s2, char *alg)
 {
     // Initialize counters for various process states and final outputs
