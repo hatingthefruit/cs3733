@@ -8,15 +8,13 @@
 #define INF_ARGS O_RDONLY | O_EXCL
 #define OF_ARGS O_CREAT | O_WRONLY
 #define OF_MODE S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP
-#define D_MASK (bytes_per_page - 1)
-#define V_MASK ((vm_size - 1) ^ D_MASK)
 
 int main(int argc, char **argv)
 {
     // Hardcoded pagetable
     int pg_tbl[10] = {2, 4, 1, 7, 3, 5, 6};
     // Variables to handle different memory parameters
-    unsigned int bytes_per_page, vm_size, pm_size, shift_amt, i;
+    unsigned long bytes_per_page, vm_size, pm_size, shift_amt, i;
     // Vars to manage input/output files
     int inf_fd, of_fd;
     char *inf_name;
@@ -49,14 +47,16 @@ int main(int argc, char **argv)
         of_name = argv[2];
     }
 
-    // Find the shift amounts for both physical & virtual memory. This is essentially the number of bits taken up by the
-    // offset. In order to lookup a frame number, we first have to convert the page bits into a normalized page number.
-    // As an example:
-    // Virtual address: yyyyyXXXXXXX
-    // The page number is represented by yyyyy, which needs to be converted from yyyyy0000000 to just yyyyy to be used
-    // as a regular number. This can be done by shifting right by the number of bits used by the offset.Once a frame
-    // number is looked up, the frame number similarly needs to be shifted left the same number of bits in order to be
-    // added to the offset.
+    // Calculate the masks needed for address calculations
+    unsigned long D_MASK = (bytes_per_page - 1);
+    unsigned long V_MASK = ((vm_size - 1) ^ D_MASK);
+
+    // Find the shift amounts for both physical & virtual memory. This is essentially the number of bits taken up by
+    // the offset. In order to lookup a frame number, we first have to convert the page bits into a normalized page
+    // number. As an example: Virtual address: yyyyyXXXXXXX The page number is represented by yyyyy, which needs to
+    // be converted from yyyyy0000000 to just yyyyy to be used as a regular number. This can be done by shifting
+    // right by the number of bits used by the offset.Once a frame number is looked up, the frame number similarly
+    // needs to be shifted left the same number of bits in order to be added to the offset.
     shift_amt = 0;
     for (i = D_MASK; i != 0; i = i >> 1) {
         shift_amt++;
