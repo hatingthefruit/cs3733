@@ -6,12 +6,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 #define INF_ARGS O_RDONLY | O_EXCL
-#define OF_ARGS O_CREAT
+#define OF_ARGS O_CREAT | O_WRONLY
 #define OF_MODE S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP
+#define D_MASK (bytes_per_page - 1)
+#define V_MASK ((vm_size - 1) ^ D_MASK)
+
 int main(int argc, char **argv)
 {
+    // Hardcoded pagetable
     int pg_tbl[10] = {2, 4, 1, 7, 3, 5, 6};
-    unsigned int bytes_per_page, vm_size, pm_size;
+    // Variables to handle different memory parameters
+    unsigned int bytes_per_page, vm_size, pm_size, shift_amt, i;
     // Vars to manage input/output files
     int inf_fd, of_fd;
     char *inf_name;
@@ -44,6 +49,19 @@ int main(int argc, char **argv)
         of_name = argv[2];
     }
 
+    // Find the shift amounts for both physical & virtual memory. This is essentially the number of bits taken up by the
+    // offset. In order to lookup a frame number, we first have to convert the page bits into a normalized page number.
+    // As an example:
+    // Virtual address: yyyyyXXXXXXX
+    // The page number is represented by yyyyy, which needs to be converted from yyyyy0000000 to just yyyyy to be used
+    // as a regular number. This can be done by shifting right by the number of bits used by the offset.Once a frame
+    // number is looked up, the frame number similarly needs to be shifted left the same number of bits in order to be
+    // added to the offset.
+    shift_amt = 0;
+    for (i = D_MASK; i != 0; i = i >> 1) {
+        shift_amt++;
+    }
+
     // Open both input and output files, exit if an error is encountered
     inf_fd = open(inf_name, INF_ARGS);
     if (inf_fd == -1) {
@@ -56,14 +74,26 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    unsigned long *addr = malloc(sizeof(unsigned long));
-    char *buff = (char *)addr;
-    int read_err;
-    do {
-        read_err = read(inf_fd, buff, 8);
-        // Test that we are reading the input file correctly
-        printf("Address read: %p\n", (void *)(*addr));
-    } while (read_err != 0);
+    // Declare the variables we need to hold our addresses before and after translation, as well as some variables we
+    // need for intermediate steps and loop control
+    unsigned long vaddr;
+    unsigned long paddr, pnum;
+    char *buff = (char *)&vaddr;
+    int write_err;
+    // Read until the end of file is reached
+    while (read(inf_fd, buff, 8) > 0) {
+        // Find the page number by selecting only the page bits and then shifting right
+        pnum = ((vaddr)&V_MASK) >> shift_amt;
+        // Create the physical address by looking up the frame number, shifting it left, and then adding the offset bits
+        // back in
+        paddr = (pg_tbl[pnum] << shift_amt) + ((vaddr)&D_MASK);
+        // Print the address translation, then write the translated address to the output file
+        printf("Virtual address %3p -> physical address %3p\n", (void *)vaddr, (void *)paddr);
+        write_err = write(of_fd, &paddr, 8);
+        if (write_err == -1) {
+            printf("Error occured while writing address. Error code: %d\n", errno);
+        }
+    }
 
     // Close the files
     close(inf_fd);
