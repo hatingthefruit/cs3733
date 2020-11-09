@@ -14,38 +14,22 @@ int main(int argc, char **argv)
     // Hardcoded pagetable
     int pg_tbl[10] = {2, 4, 1, 7, 3, 5, 6};
     // Variables to handle different memory parameters
-    unsigned long bytes_per_page, vm_size, pm_size, shift_amt, i;
+    unsigned long bytes_per_page, vm_size, shift_amt, i;
     // Vars to manage input/output files
     int inf_fd, of_fd;
     char *inf_name;
     char *of_name;
     // Check the arguments for properness
-    if (argc != 3 && argc != 6) {
+    if (argc != 3) {
         printf("Usage:\n\t%s infile outfile\n", argv[0]);
         exit(1);
     }
-    else if (argc == 6) {
-        // Parse arguments to allow for part3/bonus
-        bytes_per_page = atoi(argv[1]);
-        vm_size = atoi(argv[2]);
-        pm_size = atoi(argv[3]);
-        // Check that the input arguments are valid
-        if (bytes_per_page == 0 || vm_size == 0 || pm_size == 0) {
-            printf("Size arguments must be valid non-zero integers\n");
-            exit(1);
-        }
-        inf_name = argv[4];
-        of_name = argv[5];
-    }
-    else {
-        // Set things to defaults if parameters for the run are not specified
-        bytes_per_page = 128;
-        vm_size = 4096;
-        pm_size = 1024;
+    // Set things to defaults if parameters for the run are not specified
+    bytes_per_page = 128;
+    vm_size = 4096;
 
-        inf_name = argv[1];
-        of_name = argv[2];
-    }
+    inf_name = argv[1];
+    of_name = argv[2];
 
     // Calculate the masks needed for address calculations
     unsigned long D_MASK = (bytes_per_page - 1);
@@ -57,6 +41,7 @@ int main(int argc, char **argv)
     // be converted from yyyyy0000000 to just yyyyy to be used as a regular number. This can be done by shifting
     // right by the number of bits used by the offset.Once a frame number is looked up, the frame number similarly
     // needs to be shifted left the same number of bits in order to be added to the offset.
+    // This is pushed into a separate file for part2
     shift_amt = 0;
     for (i = D_MASK; i != 0; i = i >> 1) {
         shift_amt++;
