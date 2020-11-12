@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     // Variables to handle different memory parameters. Need to track physical memory size in this part, unlike part1
     unsigned long bytes_per_page, vm_size, pm_size, shift_amt;
     // Vars to manage input/output files
-    int inf_fd, of_fd;
+    FILE *inf_fd, *of_fd;
     char *inf_name;
     char *of_name;
     // Check the arguments for properness
@@ -34,13 +34,13 @@ int main(int argc, char **argv)
     of_name = argv[2];
 
     // Open both input and output files, exit if an error is encountered
-    inf_fd = open(inf_name, INF_ARGS);
-    if (inf_fd == -1) {
+    inf_fd = fopen(inf_name, "rb");
+    if (inf_fd == NULL) {
         printf("Error opening %s for reading; error %d\n", inf_name, errno);
         exit(1);
     }
-    of_fd = open(of_name, OF_ARGS, OF_MODE);
-    if (of_fd == -1) {
+    of_fd = fopen(of_name, "wb");
+    if (of_fd == NULL) {
         printf("Error opening %s for writing; error %d\n", of_name, errno);
         exit(1);
     }
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     char *buff = (char *)&vaddr;
     int write_err;
     // Read until the end of file is reached
-    while (read(inf_fd, buff, 8) > 0) {
+    while (fread(buff, 8, 1, inf_fd) > 0) {
         // In part 1, address translation logic was hardcoded here. Now translation is performed by calling a library
         // function from pagetable.c
         paddr = vaddr_to_paddr(vaddr, V_MASK, D_MASK, shift_amt, pte_table);
@@ -73,9 +73,10 @@ int main(int argc, char **argv)
             continue;
         }
         // Otherwise, write the address translation to the output file
-        write_err = write(of_fd, &paddr, 8);
-        if (write_err == -1) {
+        write_err = fwrite(&paddr, 8, 1, of_fd);
+        if (write_err != 8 && ferror(of_fd)) {
             printf("Error occured while writing address. Error code: %d\n", errno);
+            exit(1);
         }
     }
     // Print the number of pagefaults encountered
@@ -84,6 +85,6 @@ int main(int argc, char **argv)
     // The page table is malloc'd in the initialize function. Call this to free the memory.
     clear_table(pte_table);
     // Close the files
-    close(inf_fd);
-    close(of_fd);
+    fclose(inf_fd);
+    fclose(of_fd);
 }

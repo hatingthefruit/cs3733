@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     unsigned long bytes_per_page, vm_size, shift_amt, i;
 
     // Vars to manage input/output files
-    int inf_fd, of_fd;
+    FILE *inf_fd, *of_fd;
     char *inf_name;
     char *of_name;
 
@@ -37,13 +37,13 @@ int main(int argc, char **argv)
     of_name = argv[2];
 
     // Open both input and output files, exit if an error is encountered
-    inf_fd = open(inf_name, INF_ARGS);
-    if (inf_fd == -1) {
+    inf_fd = fopen(inf_name, "rb");
+    if (inf_fd == NULL) {
         printf("Error opening %s for reading; error %d\n", inf_name, errno);
         exit(1);
     }
-    of_fd = open(of_name, OF_ARGS, OF_MODE);
-    if (of_fd == -1) {
+    of_fd = fopen(of_name, "wb");
+    if (of_fd == NULL) {
         printf("Error opening %s for writing; error %d\n", of_name, errno);
         exit(1);
     }
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     char *buff = (char *)&vaddr;
     int write_err;
     // Read until the end of file is reached
-    while (read(inf_fd, buff, 8) > 0) {
+    while (fread(buff, 8, 1, inf_fd) > 0) {
         // Find the page number by selecting only the page bits and then shifting right
         pnum = ((vaddr)&V_MASK) >> shift_amt;
         // Create the physical address by looking up the frame number, shifting it left, and then adding the offset bits
@@ -79,13 +79,14 @@ int main(int argc, char **argv)
         paddr = (pg_tbl[pnum] << shift_amt) + ((vaddr)&D_MASK);
         // Print the address translation, then write the translated address to the output file
         printf("Virtual address %3p -> physical address %3p\n", (void *)vaddr, (void *)paddr);
-        write_err = write(of_fd, &paddr, 8);
-        if (write_err == -1) {
+        write_err = fwrite(&paddr, 8, 1, of_fd);
+        if (write_err != 8 && ferror(of_fd)) {
             printf("Error occured while writing address. Error code: %d\n", errno);
+            exit(1);
         }
     }
 
     // Close the files
-    close(inf_fd);
-    close(of_fd);
+    fclose(inf_fd);
+    fclose(of_fd);
 }
