@@ -13,23 +13,40 @@ int main(int argc, char **argv)
 {
     // Hardcoded pagetable
     int pg_tbl[10] = {2, 4, 1, 7, 3, 5, 6};
-    // Variables to handle different memory parameters
+
+    // Variables to handle different memory parameters, as well as an iterator
     unsigned long bytes_per_page, vm_size, shift_amt, i;
+
     // Vars to manage input/output files
     int inf_fd, of_fd;
     char *inf_name;
     char *of_name;
+
     // Check the arguments for properness
     if (argc != 3) {
         printf("Usage:\n\t%s infile outfile\n", argv[0]);
         exit(1);
     }
-    // Set things to defaults if parameters for the run are not specified
+
+    // Set things to defaults; in part 3 these will be pulled from commandline parameters, but the logic will be reused
     bytes_per_page = 128;
     vm_size = 4096;
 
+    // Get file names from arguments
     inf_name = argv[1];
     of_name = argv[2];
+
+    // Open both input and output files, exit if an error is encountered
+    inf_fd = open(inf_name, INF_ARGS);
+    if (inf_fd == -1) {
+        printf("Error opening %s for reading; error %d\n", inf_name, errno);
+        exit(1);
+    }
+    of_fd = open(of_name, OF_ARGS, OF_MODE);
+    if (of_fd == -1) {
+        printf("Error opening %s for writing; error %d\n", of_name, errno);
+        exit(1);
+    }
 
     // Calculate the masks needed for address calculations
     unsigned long D_MASK = (bytes_per_page - 1);
@@ -45,18 +62,6 @@ int main(int argc, char **argv)
     shift_amt = 0;
     for (i = D_MASK; i != 0; i = i >> 1) {
         shift_amt++;
-    }
-
-    // Open both input and output files, exit if an error is encountered
-    inf_fd = open(inf_name, INF_ARGS);
-    if (inf_fd == -1) {
-        printf("Error opening %s for reading; error %d\n", inf_name, errno);
-        exit(1);
-    }
-    of_fd = open(of_name, OF_ARGS, OF_MODE);
-    if (of_fd == -1) {
-        printf("Error opening %s for writing; error %d\n", of_name, errno);
-        exit(1);
     }
 
     // Declare the variables we need to hold our addresses before and after translation, as well as some variables we

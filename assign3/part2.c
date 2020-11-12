@@ -29,18 +29,9 @@ int main(int argc, char **argv)
     vm_size = 4096;
     pm_size = 1024;
 
+    // pull file names from arguments
     inf_name = argv[1];
     of_name = argv[2];
-
-    // Calculate the masks needed for address calculations
-    unsigned long D_MASK = calc_d_mask(bytes_per_page);
-    unsigned long V_MASK = calc_v_mask(vm_size, D_MASK);
-
-    // Find the shift amounts for both physical & virtual memory.
-    shift_amt = calc_shift(D_MASK);
-
-    pte_t *pte_table = initialize_table(vm_size, bytes_per_page);
-    initialize_frames(pm_size, bytes_per_page);
 
     // Open both input and output files, exit if an error is encountered
     inf_fd = open(inf_name, INF_ARGS);
@@ -54,6 +45,17 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    // Calculate the masks needed for address calculations
+    unsigned long D_MASK = calc_d_mask(bytes_per_page);
+    unsigned long V_MASK = calc_v_mask(vm_size, D_MASK);
+
+    // Find the shift amounts for both physical & virtual memory.
+    shift_amt = calc_shift(D_MASK);
+
+    // Initialize the page table and the physical frames
+    pte_t *pte_table = initialize_table(vm_size, bytes_per_page);
+    initialize_frames(pm_size, bytes_per_page);
+
     // Declare the variables we need to hold our addresses before and after translation, as well as some variables we
     // need for intermediate steps and loop control
     unsigned long vaddr;
@@ -62,20 +64,24 @@ int main(int argc, char **argv)
     int write_err;
     // Read until the end of file is reached
     while (read(inf_fd, buff, 8) > 0) {
-
+        // In part 1, address translation logic was hardcoded here. Now translation is performed by calling a library
+        // function from pagetable.c
         paddr = vaddr_to_paddr(vaddr, V_MASK, D_MASK, shift_amt, pte_table);
+        // Check to make sure the page we passed was a valid one
         if (paddr == ERR_INVALID_PAGE) {
             printf("Page is out of range\n");
+            continue;
         }
-        printf("Virtual address %3p -> physical address %3p\n", (void *)vaddr, (void *)paddr);
+        // Otherwise, write the address translation to the output file
         write_err = write(of_fd, &paddr, 8);
         if (write_err == -1) {
             printf("Error occured while writing address. Error code: %d\n", errno);
         }
     }
-
+    // Print the number of pagefaults encountered
     printf("Number of pagefaults: %u\n", get_page_faults());
 
+    // The page table is malloc'd in the initialize function. Call this to free the memory.
     clear_table(pte_table);
     // Close the files
     close(inf_fd);
