@@ -1,0 +1,459 @@
+Section: Part1
+
+
+In this section, the threads are referenced by an array:
+
+pthread_t threads[nthreads];
+
+This array is filled during the loop that creates the philosopher threads. Once that loop is finished, another loop joins on the threads:
+
+	for (i = 0; i < nthreads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+In this loop, each thread is joined on in a numerically increasing order. This call blocks if the thread is not finished, or returns immediately if it is. 
+In this way, we can make sure that every thread is joined on, no matter the actual order of completion. If a thread is not done, then the main thread will wait on it.
+If a thread finished while a numerically lower thread was still executing, then it will be joined on as soon as its number is reached.
+
+./assign4-part1 5 >> report.txt 
+Andrew DiCarlo
+Assignment 4: # of threads = 5
+This is philosopher 0
+This is philosopher 1
+This is philosopher 2
+This is philosopher 3
+This is philosopher 4
+5 threads have been completed/joined successfully!
+
+./assign4-part1 20 >> report.txt
+Andrew DiCarlo
+Assignment 4: # of threads = 20
+This is philosopher 0
+This is philosopher 1
+This is philosopher 2
+This is philosopher 3
+This is philosopher 4
+This is philosopher 5
+This is philosopher 6
+This is philosopher 7
+This is philosopher 8
+This is philosopher 9
+This is philosopher 10
+This is philosopher 11
+This is philosopher 12
+This is philosopher 13
+This is philosopher 14
+This is philosopher 15
+This is philosopher 16
+This is philosopher 17
+This is philosopher 18
+This is philosopher 19
+20 threads have been completed/joined successfully!
+
+
+Section: Part2
+
+Before starting this section of the assignment, I noticed that deadlock caused by all philosophers reaching for
+their left (or right) chopstick seemed to be easily mitigated by alternating which side the philosophers reached for.
+The easiest way I saw to implement this was to have even and odd threads go for different sides first.
+
+From pickUpChopsticks():
+
+    int remain = threadIndex % 2;
+    // This code alternates which chopstick gets 'picked up' first
+    // There's two cases:
+    //  ThreadIndex is even -> remain = 0
+    //     -> threadIndex + remain = threadIndex (left)
+    //     -> threadIndex + 1 - remain = threadIndex + 1 (right)
+    //  threadIndex is off -> remain = 1
+    //     -> threadIndex + remain = threadIndex + 1 (right)
+    //     -> threadIndex + 1 - remain = threadIndex (left)
+    // Alternating which side gets picked up first helps avoid deadlock
+    pthread_mutex_lock(&(chopsticks[(threadIndex + remain) % nthreads]));
+    pthread_mutex_lock(&(chopsticks[(threadIndex + 1 - remain) % nthreads]));
+
+In which the left chopstick is represented by chopsticks[n] and the right is represented by chopsticks[(n + 1) % nthreads]
+
+Just to confirm, I ran this 10,000 times with 5 threads, without any issues.
+
+./assign4-part2 5 >> report.txt
+Andrew DiCarlo
+Assignment 4: # of threads = 5
+This is philosopher 0
+Philosopher #0: start thinking
+This is philosopher 1
+Philosopher #1: start thinking
+This is philosopher 2
+Philosopher #2: start thinking
+This is philosopher 3
+Philosopher #3: start thinking
+Philosopher #0: stop thinking
+Philosopher #0: start eating
+Philosopher #1: stop thinking
+This is philosopher 4
+Philosopher #4: start thinking
+Philosopher #2: stop thinking
+Philosopher #0: stop eating
+Philosopher #1: start eating
+Philosopher #4: stop thinking
+Philosopher #4: start eating
+Philosopher #3: stop thinking
+Philosopher #1: stop eating
+Philosopher #2: start eating
+Philosopher #4: stop eating
+Philosopher #2: stop eating
+Philosopher #3: start eating
+Philosopher #3: stop eating
+5 threads have been completed/joined successfully!
+
+./assign4-part2 20 >> report.txt
+Andrew DiCarlo
+Assignment 4: # of threads = 20
+This is philosopher 0
+Philosopher #0: start thinking
+This is philosopher 1
+Philosopher #1: start thinking
+This is philosopher 2
+Philosopher #2: start thinking
+This is philosopher 3
+Philosopher #3: start thinking
+This is philosopher 4
+Philosopher #4: start thinking
+This is philosopher 5
+Philosopher #5: start thinking
+This is philosopher 6
+Philosopher #6: start thinking
+This is philosopher 7
+Philosopher #7: start thinking
+This is philosopher 8
+Philosopher #8: start thinking
+This is philosopher 9
+Philosopher #9: start thinking
+This is philosopher 10
+Philosopher #10: start thinking
+This is philosopher 11
+Philosopher #11: start thinking
+This is philosopher 12
+Philosopher #12: start thinking
+This is philosopher 13
+Philosopher #13: start thinking
+This is philosopher 14
+Philosopher #14: start thinking
+This is philosopher 15
+Philosopher #15: start thinking
+This is philosopher 16
+Philosopher #16: start thinking
+This is philosopher 17
+Philosopher #17: start thinking
+This is philosopher 18
+Philosopher #18: start thinking
+This is philosopher 19
+Philosopher #19: start thinking
+Philosopher #0: stop thinking
+Philosopher #0: start eating
+Philosopher #2: stop thinking
+Philosopher #2: start eating
+Philosopher #1: stop thinking
+Philosopher #3: stop thinking
+Philosopher #4: stop thinking
+Philosopher #7: stop thinking
+Philosopher #5: stop thinking
+Philosopher #7: start eating
+Philosopher #5: start eating
+Philosopher #6: stop thinking
+Philosopher #8: stop thinking
+Philosopher #9: stop thinking
+Philosopher #9: start eating
+Philosopher #12: stop thinking
+Philosopher #12: start eating
+Philosopher #10: stop thinking
+Philosopher #11: stop thinking
+Philosopher #13: stop thinking
+Philosopher #14: stop thinking
+Philosopher #15: stop thinking
+Philosopher #15: start eating
+Philosopher #0: stop eating
+Philosopher #16: stop thinking
+Philosopher #17: stop thinking
+Philosopher #17: start eating
+Philosopher #18: stop thinking
+Philosopher #2: stop eating
+Philosopher #1: start eating
+Philosopher #3: start eating
+Philosopher #19: stop thinking
+Philosopher #19: start eating
+Philosopher #7: stop eating
+Philosopher #5: stop eating
+Philosopher #6: start eating
+Philosopher #9: stop eating
+Philosopher #8: start eating
+Philosopher #10: start eating
+Philosopher #12: stop eating
+Philosopher #13: start eating
+Philosopher #15: stop eating
+Philosopher #17: stop eating
+Philosopher #16: start eating
+Philosopher #1: stop eating
+Philosopher #3: stop eating
+Philosopher #4: start eating
+Philosopher #19: stop eating
+Philosopher #18: start eating
+Philosopher #6: stop eating
+Philosopher #8: stop eating
+Philosopher #10: stop eating
+Philosopher #11: start eating
+Philosopher #13: stop eating
+Philosopher #14: start eating
+Philosopher #16: stop eating
+Philosopher #4: stop eating
+Philosopher #18: stop eating
+Philosopher #14: stop eating
+Philosopher #11: stop eating
+20 threads have been completed/joined successfully!
+
+Section: Part 3
+
+To complete this section, I added three global variables: a counter, a conditional variable, and a mutex.
+
+	int next_index = 0;
+	pthread_mutex_t index_lock;
+	pthread_cond_t next_cv;
+
+In each philosopher thread, after the philosopher finishes thinking, they aquire a lock on the mutex for the counter:
+
+	pthread_mutex_lock(&index_lock);
+
+Once the lock is acquired, the thread checks to see if it is time for it to eat yet.
+If it's not, it waits on the global CV:
+
+    while (next_index != number) {
+        pthread_cond_wait(&next_cv, &index_lock);
+    }
+
+Once it is the thread's turn, the thread acquires chopstick locks, eats, stops eating, and puts the chopsticks down.
+At that point, the counter can be incremented. Once the counter is incremented, a broadcast is used to wake up all
+threads who are waiting to eat. Subsequently, the mutex is unlocked:
+
+    // Increment the number and then signal the waiting threads to check
+    next_index++;
+    pthread_cond_broadcast(&next_cv);
+    pthread_mutex_unlock(&index_lock);
+
+
+./assign4-part3 5 >> report.txt
+Andrew DiCarlo
+Assignment 4: # of threads = 5
+This is philosopher 0
+Philosopher #0: start thinking
+This is philosopher 1
+Philosopher #1: start thinking
+This is philosopher 2
+Philosopher #2: start thinking
+This is philosopher 3
+Philosopher #3: start thinking
+This is philosopher 4
+Philosopher #4: start thinking
+Philosopher #0: stop thinking
+Philosopher #0: start eating
+Philosopher #1: stop thinking
+Philosopher #2: stop thinking
+Philosopher #3: stop thinking
+Philosopher #4: stop thinking
+Philosopher #0: stop eating
+Philosopher #1: start eating
+Philosopher #1: stop eating
+Philosopher #2: start eating
+Philosopher #2: stop eating
+Philosopher #3: start eating
+Philosopher #3: stop eating
+Philosopher #4: start eating
+Philosopher #4: stop eating
+5 threads have been completed/joined successfully!
+
+Andrew DiCarlo
+Assignment 4: # of threads = 20
+This is philosopher 0
+Philosopher #0: start thinking
+This is philosopher 1
+Philosopher #1: start thinking
+This is philosopher 2
+Philosopher #2: start thinking
+This is philosopher 3
+Philosopher #3: start thinking
+This is philosopher 4
+Philosopher #4: start thinking
+This is philosopher 5
+Philosopher #5: start thinking
+This is philosopher 6
+Philosopher #6: start thinking
+This is philosopher 7
+Philosopher #7: start thinking
+This is philosopher 8
+Philosopher #8: start thinking
+This is philosopher 9
+Philosopher #9: start thinking
+This is philosopher 10
+Philosopher #10: start thinking
+This is philosopher 11
+Philosopher #11: start thinking
+This is philosopher 12
+Philosopher #12: start thinking
+Philosopher #0: stop thinking
+Philosopher #0: start eating
+This is philosopher 13
+Philosopher #2: stop thinking
+Philosopher #13: start thinking
+Philosopher #1: stop thinking
+This is philosopher 14
+Philosopher #14: start thinking
+This is philosopher 15
+Philosopher #15: start thinking
+Philosopher #3: stop thinking
+Philosopher #5: stop thinking
+Philosopher #4: stop thinking
+This is philosopher 16
+Philosopher #16: start thinking
+This is philosopher 17
+Philosopher #17: start thinking
+Philosopher #6: stop thinking
+Philosopher #8: stop thinking
+Philosopher #7: stop thinking
+This is philosopher 18
+Philosopher #18: start thinking
+This is philosopher 19
+Philosopher #19: start thinking
+Philosopher #9: stop thinking
+Philosopher #11: stop thinking
+Philosopher #10: stop thinking
+Philosopher #12: stop thinking
+Philosopher #0: stop eating
+Waiting in process 2
+Philosopher #1: start eating
+Philosopher #15: stop thinking
+Philosopher #14: stop thinking
+Philosopher #13: stop thinking
+Philosopher #16: stop thinking
+Philosopher #17: stop thinking
+Philosopher #18: stop thinking
+Philosopher #19: stop thinking
+Philosopher #1: stop eating
+Philosopher #2: start eating
+Philosopher #2: stop eating
+Waiting in process 5
+Waiting in process 4
+Waiting in process 6
+Waiting in process 8
+Waiting in process 7
+Waiting in process 9
+Waiting in process 11
+Waiting in process 10
+Waiting in process 12
+Waiting in process 15
+Waiting in process 14
+Waiting in process 13
+Waiting in process 16
+Waiting in process 17
+Waiting in process 18
+Waiting in process 19
+Philosopher #3: start eating
+Philosopher #3: stop eating
+Waiting in process 18
+Waiting in process 19
+Philosopher #4: start eating
+Philosopher #4: stop eating
+Waiting in process 19
+Waiting in process 18
+Waiting in process 7
+Waiting in process 10
+Waiting in process 11
+Waiting in process 14
+Waiting in process 9
+Waiting in process 12
+Waiting in process 13
+Waiting in process 15
+Waiting in process 17
+Waiting in process 16
+Philosopher #5: start eating
+Philosopher #5: stop eating
+Waiting in process 13
+Waiting in process 17
+Waiting in process 16
+Waiting in process 8
+Waiting in process 15
+Philosopher #6: start eating
+Philosopher #6: stop eating
+Waiting in process 15
+Waiting in process 11
+Waiting in process 8
+Waiting in process 9
+Waiting in process 19
+Waiting in process 14
+Waiting in process 10
+Philosopher #7: start eating
+Philosopher #7: stop eating
+Waiting in process 17
+Waiting in process 13
+Waiting in process 16
+Waiting in process 12
+Waiting in process 18
+Philosopher #8: start eating
+Philosopher #8: stop eating
+Waiting in process 12
+Waiting in process 13
+Waiting in process 16
+Waiting in process 11
+Philosopher #9: start eating
+Philosopher #9: stop eating
+Waiting in process 11
+Waiting in process 16
+Waiting in process 14
+Waiting in process 17
+Waiting in process 18
+Waiting in process 15
+Philosopher #10: start eating
+Philosopher #10: stop eating
+Waiting in process 17
+Waiting in process 14
+Waiting in process 13
+Waiting in process 12
+Waiting in process 15
+Philosopher #11: start eating
+Philosopher #11: stop eating
+Waiting in process 13
+Waiting in process 14
+Waiting in process 19
+Waiting in process 15
+Waiting in process 16
+Waiting in process 17
+Waiting in process 18
+Philosopher #12: start eating
+Philosopher #12: stop eating
+Waiting in process 17
+Philosopher #13: start eating
+Philosopher #13: stop eating
+Waiting in process 17
+Waiting in process 16
+Waiting in process 18
+Waiting in process 15
+Waiting in process 19
+Philosopher #14: start eating
+Philosopher #14: stop eating
+Waiting in process 19
+Waiting in process 18
+Waiting in process 17
+Waiting in process 16
+Philosopher #15: start eating
+Philosopher #15: stop eating
+Waiting in process 17
+Waiting in process 19
+Philosopher #16: start eating
+Philosopher #16: stop eating
+Waiting in process 18
+Waiting in process 19
+Philosopher #17: start eating
+Philosopher #17: stop eating
+Philosopher #18: start eating
+Philosopher #18: stop eating
+Philosopher #19: start eating
+Philosopher #19: stop eating
+20 threads have been completed/joined successfully!
