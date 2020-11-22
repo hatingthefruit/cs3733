@@ -1,7 +1,7 @@
 CC=gcc
 CCARGS=-Wall -g -pthread
 INCLUDES=pages.h
-TARGETS=assign4-part1 assign4-part2 assign4-part3
+TARGETS=assign4-part1 assign4-part2 assign4-part3 assign4-part4
 
 all: $(TARGETS)
 

@@ -457,3 +457,68 @@ Philosopher #18: stop eating
 Philosopher #19: start eating
 Philosopher #19: stop eating
 20 threads have been completed/joined successfully!
+
+Section: Part 4
+
+For this section, I removed the code that alternates which side each thread starts to pick up chopsticks on. Instead, all threads lock the left chopstick:
+
+    pthread_mutex_lock(&(chopsticks[threadIndex]));
+
+If the thread blocks here, it's fine; nothing is waiting on any resource it has. Once the thread has the lock on the left chopstick, it tries for the right, in a loop:
+
+    while (pthread_mutex_trylock(&(chopsticks[(threadIndex + 1) % nthreads])) != 0) {
+        clock_gettime(CLOCK_REALTIME, &wait);
+        wait.tv_nsec += sleep_time * 1000000;
+        pthread_cond_timedwait(&chopstick_cond, &(chopsticks[threadIndex]), &wait);
+    }
+
+If the thread isn't able to get a lock on the right chopstick, it gives up the lock on the left and does a timed wait
+on a conditional variable, with a randomly chosen time period between 1 and 500 ms:
+
+    struct timespec wait;
+    unsigned int seed = time(NULL);
+    srandom(seed);
+    // Get a random number between 1 and 500
+    unsigned int sleep_time = ((random()) % 500) + 1;
+
+Whenever any thread puts down chopsticks, it does a braodcast on this variable. Originally, the plan was to have an 
+array of CVs similar to the mutexes that represent the chopsticks, and to use a regular wait on
+those CVs. However, that still left open the possibility that threads would end up in a circular waiting situation 
+similar to the circular deadlock problem that we are trying to solve. This could potentially be made to work by signaling
+the CV for the left chopstick before waiting on the CV for the right chopstick. However, since signal does not wake up
+threads that have not waited yet, there is still a (very small chance) that we could still end up in a circular wait.
+Having a random sleep period avoids this issue.
+
+This is a blunt force solution with a lot of overhead. I think alternating the start side is a much more efficient and 
+elegant way of avoiding deadlock. Dr. Shene has demonstrated on his website that having at least one thread that 
+starts on the opposite side will completely avoid deadlock, at much less cost to design or compute.s cost to compute 
+
+./assign4-part4 5
+Andrew DiCarlo
+Assignment 4: # of threads = 5
+This is philosopher 0
+Philosopher #0: start thinking
+This is philosopher 1
+Philosopher #1: start thinking
+This is philosopher 2
+Philosopher #2: start thinking
+This is philosopher 3
+Philosopher #3: start thinking
+This is philosopher 4
+Philosopher #4: start thinking
+Philosopher #0: stop thinking
+Philosopher #1: stop thinking
+Philosopher #3: stop thinking
+Philosopher #0: start eating
+Philosopher #3: start eating
+Philosopher #2: stop thinking
+Philosopher #4: stop thinking
+Philosopher #3: stop eating
+Philosopher #2: start eating
+Philosopher #0: stop eating
+Philosopher #4: start eating
+Philosopher #2: stop eating
+Philosopher #1: start eating
+Philosopher #4: stop eating
+Philosopher #1: stop eating
+5 threads have been completed/joined successfully!
